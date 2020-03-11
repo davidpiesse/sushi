@@ -4,11 +4,11 @@ Eloquent's missing "array" driver.
 Sometimes you want to use Eloquent, but without dealing with a database.
 
 ## This Package Is Sponsorware 💰💰💰
-Currently, this package is only available to people who [sponsor me](https://github.com/sponsors/calebporzio) on GitHub.
+Originally, this package was only available to my sponsors on GitHub Sponsors until I reached 75 sponsors.
 
-Once I have a total of 75 GitHub Sponsors, I will make this package fully open source. (26 more new sponsors to go!)
+Now that we've reached the goal, the package is fully open source.
 
-Thanks for the support! ❤️
+Enjoy, and thanks for the support! ❤️
 
 ## Install
 ```
@@ -96,5 +96,48 @@ User::with('role')->first();
 
 > Note: There is one caveat when dealing with Sushi model relationships. The `whereHas` method will NOT work. This is because the two models are spread across two separate databases.
 
+### Custom Schema
+If Sushi's schema auto-detection system doesn't meet your specific requirements for the supplied row data, you can customize them with the `$schema` property or the `getSchema()` method.
+
+```php
+class Products extends Model
+{
+    use \Sushi\Sushi;
+
+    protected $rows = [
+        ['name' => 'Lawn Mower', 'price' => '226.99'],
+        ['name' => 'Leaf Blower', 'price' => '134.99'],
+        ['name' => 'Rake', 'price' => '9.99'],
+    ];
+
+    protected $schema = [
+        'price' => 'float',
+    ];
+}
+```
+
 ## How It Works
 Under the hood, this package creates and caches a SQLite database JUST for this model. It creates a table and populates the rows. If, for whatever reason, it can't cache a .sqlite file, it will default to using an in-memory sqlite database.
+
+## Using ->getRows()
+You can optionally opt out of using the `protected $rows` property, and directly implement your own `getRows()` method.
+
+This will allow you to determine the rows for the model at runtime. You can even generate the model's rows from an external source like a third-party API.
+
+> Note: If you choose to use your own ->getRows() method, the rows will NOT be cached between requests.
+
+```php
+class Role extends Model
+{
+    use \Sushi\Sushi;
+
+    public function getRows()
+    {
+        return [
+            ['id' => 1, 'label' => 'admin'],
+            ['id' => 2, 'label' => 'manager'],
+            ['id' => 3, 'label' => 'user'],
+        ];
+    }
+}
+```
