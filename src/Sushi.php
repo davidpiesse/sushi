@@ -2,6 +2,7 @@
 
 namespace Sushi;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Connectors\ConnectionFactory;
 use Illuminate\Support\Str;
 
@@ -9,9 +10,17 @@ trait Sushi
 {
     protected static $sushiConnection;
 
+    protected $usesCache;
+
     public function getRows()
     {
-        return $this->rows;
+        $rows = $this->rows;
+        if($this->usesCache == true){
+            return Cache::rememberForever('rows', function() {
+                return $rows;  
+            });
+        }
+        return $rows;
     }
 
     public function getSchema()
